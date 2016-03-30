@@ -7,18 +7,24 @@ Licence MIT
 import cgi
 import html
 
-from .constants import *
-from .utils import normalize
+from .utils import *
 
 
-def form_builder(text_field, text_field_name, redirect_to, method, formulaire):
+def form_builder(label, text_field_name, redirect_to, env):
+    formulaire = cgi.FieldStorage(fp=env['wsgi.input'], environ=env)
+    s = StringIO()
+
     if text_field_name in formulaire:
-        return normalize(html.escape(formulaire.getvalue(text_field_name, "")))
+        with tag("", s):
+            print(html.escape(formulaire.getvalue(text_field_name, "")))
+        return normalize(s.getvalue())
     else:
-        return normalize(text_field + '<form method="' + method + '" action="/' + redirect_to + '"><input name="' + text_field_name + '"/></form>')
+        with tag("form", s, method="get", action="/{redirect}".format(redirect=redirect_to)):
+            with tag("label", s):
+                print(label)
+            print("<input name='{field_name}' />".format(field_name=text_field_name))
+        return normalize(s.getvalue())
 
 
 def test_form(env, resp, addr):
-    formulaire = cgi.FieldStorage(fp=env['wsgi.input'], environ=env)
-
-    return form_builder("un pseudo", "pseudo", ':'.join(str(i) for i in addr) + "/pseudo", "get", formulaire)
+    return form_builder("Un pseudo", "pseudo", ':'.join(str(i) for i in addr) + "/pseudo", env)

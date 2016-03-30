@@ -7,13 +7,17 @@ Licence MIT
 import time
 
 from .constants import *
-from .utils import normalize
+from .utils import *
 from . import forms
 
 
 def index(env, resp):
     resp(ok, HTML_PAGE)
-    return normalize("Hello world !", time.time())
+    s = StringIO()
+    with tag("p", s):
+        print("Hello world !", end="<br />")
+        print("Il est {} !".format(time.time()))
+    return normalize(s.getvalue())
 
 
 def pseudo(env, resp):
@@ -23,7 +27,12 @@ def pseudo(env, resp):
 
 def not_found(env, resp):
     resp(page_not_found, HTML_PAGE)
-    return normalize("<center><h1 style=\"color: red;\">Erreur 404</h1>", "La page n'a pas pu être trouvée ...</center>")
+    s = StringIO()
+    with tag("center", s):
+        with tag("h1", s, style="color: red;"):
+            print("Erreur 404")
+        print("La page n'a pas pu être trouvée ...")
+    return normalize(s.getvalue())
 
 
 def rooter(env, resp):
