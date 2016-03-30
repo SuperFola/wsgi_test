@@ -21,7 +21,10 @@ def normalize(content):
 @contextmanager
 def tag(name: str, stream: StringIO, **style):
     with redirect_stdout(stream):
-        print("<%s %s>" % (name, ' '.join("%s='%s'" % (k, v) for k, v in style.items())), end='')
+        if style:
+            print("<%s %s>" % (name, ' '.join("%s='%s'" % (k, v) for k, v in style.items())), end='')
+        else:
+            print("<%s>" % name)
         yield
         print("</%s>" % name, end='')
 
